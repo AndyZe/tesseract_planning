@@ -135,6 +135,33 @@ TaskComposerNodeInfo UpdateStartAndEndStateTask::runImpl(TaskComposerContext& co
   auto* last_move_instruction = instructions.getLastMoveInstruction();
   /** @todo Should the waypoint profile be updated to the path profile if it exists? **/
 
+  if (first_move_instruction == nullptr || last_move_instruction == nullptr)
+  {
+    info.status_message = "UpdateStartAndEndStateTask: Input data for key '" +
+                          input_port_mappings_.single(INPUT_CURRENT_PROGRAM_PORT) +
+                          "' does not contain a move instruction";
+    TESSERACT_LOG_ERROR("{}", info.status_message.c_str());
+    return info;
+  }
+
+  if (prev_last_move == nullptr)
+  {
+    info.status_message = "UpdateStartAndEndStateTask: Input data for key '" +
+                          input_port_mappings_.single(INPUT_PREVIOUS_PROGRAM_PORT) +
+                          "' does not contain a move instruction";
+    TESSERACT_LOG_ERROR("{}", info.status_message.c_str());
+    return info;
+  }
+
+  if (next_start_move == nullptr)
+  {
+    info.status_message = "UpdateStartAndEndStateTask: Input data for key '" +
+                          input_port_mappings_.single(INPUT_NEXT_PROGRAM_PORT) +
+                          "' does not contain a move instruction";
+    TESSERACT_LOG_ERROR("{}", info.status_message.c_str());
+    return info;
+  }
+
   // Update start instruction
   if (prev_last_move->getWaypoint().isCartesianWaypoint() || prev_last_move->getWaypoint().isJointWaypoint() ||
       prev_last_move->getWaypoint().isStateWaypoint())

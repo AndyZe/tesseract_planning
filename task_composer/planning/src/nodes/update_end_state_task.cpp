@@ -114,10 +114,27 @@ TaskComposerNodeInfo UpdateEndStateTask::runImpl(TaskComposerContext& context,
   auto& instructions = input_data_poly.as<tesseract::command_language::CompositeInstruction>();
   auto* last_move_instruction = instructions.getLastMoveInstruction();
   /** @todo Should the waypoint profile be updated to the path profile if it exists? **/
+  if (last_move_instruction == nullptr)
+  {
+    info.status_message = "UpdateEndStateTask: Input data for key '" +
+                          input_port_mappings_.single(INPUT_CURRENT_PROGRAM_PORT) +
+                          "' does not contain a move instruction";
+    TESSERACT_LOG_ERROR("{}", info.status_message.c_str());
+    return info;
+  }
 
   // Update end instruction
   const auto* next_start_move =
       input_next_data_poly.as<tesseract::command_language::CompositeInstruction>().getFirstMoveInstruction();
+  if (next_start_move == nullptr)
+  {
+    info.status_message = "UpdateEndStateTask: Input data for key '" +
+                          input_port_mappings_.single(INPUT_NEXT_PROGRAM_PORT) +
+                          "' does not contain a move instruction";
+    TESSERACT_LOG_ERROR("{}", info.status_message.c_str());
+    return info;
+  }
+
   if (next_start_move->getWaypoint().isCartesianWaypoint() || next_start_move->getWaypoint().isJointWaypoint() ||
       next_start_move->getWaypoint().isStateWaypoint())
     last_move_instruction->getWaypoint() = next_start_move->getWaypoint();
